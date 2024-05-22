@@ -15,10 +15,9 @@ class NXOSDevice():
         self.username = user
         self.password = password
         self.scheme = "https"
-        self.insecure = True
-        code, self.session = self._aaa_login()
-        print(f"Login status code: {code}.")
-        pass
+        self.verify_ssl = False
+        self.session = requests.Session()
+        self.connect()
 
     def _aaa_login(self):
         payload = {
@@ -30,13 +29,12 @@ class NXOSDevice():
             }
         }
         url = self._build_url("/api/aaaLogin.json")
-        session = requests.Session()
-        response = session.request(
-            "POST", url, data=json.dumps(payload), verify=False)
+        response = self._request(
+            "POST", url, data=json.dumps(payload))
         if response.status_code == requests.codes.ok:
             print("aaaLogin RESPONSE:")
             print(json.dumps(json.loads(response.text), indent=2))
-        return response.status_code, session
+        return response.status_code
 
     def _aaa_logout(self):
         payload = {
@@ -48,8 +46,8 @@ class NXOSDevice():
         }
         url = self._build_url("/api/aaaLogout.json")
 
-        response = self.session.request(
-            "POST", url, data=json.dumps(payload), verify=False)
+        response = self._request(
+            "POST", url, data=json.dumps(payload))
         print()
         print("aaaLogout RESPONSE:")
         print(json.dumps(json.loads(response.text), indent=2))
@@ -57,19 +55,22 @@ class NXOSDevice():
     def _build_url(self, endpoint):
         return self.scheme + "://" + self.ip_addr + endpoint
 
+    def _request(self, *args, **kwargs):
+        return self.session.request(*args, verify=self.verify_ssl, **kwargs)
+
     def get(self, endpoint):
         url = self._build_url(endpoint)
-        response = self.session.request(
-            "GET", url, verify=False)
+        response = self._request(
+            "GET", url)
         print()
         print("GET RESPONSE:")
         print(json.dumps(json.loads(response.text), indent=2))
 
     def connect(self):
-        pass
+        self._aaa_login()
 
     def disconnect(self):
-        pass
+        self._aaa_logout()
 
     def reset(self):
         pass
