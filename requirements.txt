@@ -28,3 +28,6 @@ scp>=0.14.4
 # EASYUCS-620: Restricting cffi version to 1.15.0. This is a workaround to avoid the error "Invalid DER encoding inside the PEM file"
 # TODO: To root cause the issue, we need to do more debugging inside cffi code.
 cffi==1.15.0
+
+# NXOS dependencies
+python-dotenv
